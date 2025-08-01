@@ -1,18 +1,1 @@
-# Twilio Configuration
-TWILIO_ACCOUNT_SID=your_twilio_account_sid_here
-TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
-TWILIO_WHATSAPP_NUMBER=+14155238886
-
-# Hugging Face Configuration
-HUGGINGFACE_API_KEY=your_huggingface_api_key_here
-
-# Flask Configuration
-SECRET_KEY=your-secret-key-here
-DEBUG=True
-
-# Supabase Configuration
-SUPABASE_URL=your_supabase_url_here
-SUPABASE_KEY=your_supabase_anon_key_here
-
-# Expiry Alert Configuration
-EXPIRY_ALERT_DAYS=3
+hello
