@@ -1,0 +1,14 @@
+# Twilio Configuration
+TWILIO_ACCOUNT_SID=your_twilio_account_sid_here
+TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
+TWILIO_WHATSAPP_NUMBER=+14155238886
+
+# OpenAI Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Flask Configuration
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+
+# Database Configuration (optional)
+DATABASE_URL=sqlite:///sales.db 
