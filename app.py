@@ -2,8 +2,9 @@ from flask import Flask, request, jsonify
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.rest import Client
 from config import Config
-from db import create_database
+from db import create_database_schema
 from ai import AIQueryProcessor
+from expiry_alert import setup_cron_job, send_expiry_alerts
 import logging
 import json
 
@@ -114,14 +115,20 @@ def whatsapp_webhook():
         incoming_msg = request.values.get('Body', '').strip()
         from_number = request.values.get('From', '')
         
-        logger.info(f"Received message from {from_number}: {incoming_msg}")
+        # Extract the actual phone number from the WhatsApp format (whatsapp:+1234567890)
+        if from_number.startswith('whatsapp:'):
+            phone_number = from_number.split('whatsapp:')[1]
+        else:
+            phone_number = from_number
+        
+        logger.info(f"Received message from {phone_number}: {incoming_msg}")
         
         # Create Twilio response
         resp = MessagingResponse()
         msg = resp.message()
         
         # Get user's language preference
-        user_lang = get_user_language(from_number)
+        user_lang = get_user_language(phone_number)
         
         # Handle different types of messages
         if not incoming_msg:
@@ -131,7 +138,7 @@ def whatsapp_webhook():
         # Language selection
         if incoming_msg in ['1', '2']:
             selected_lang = 'en' if incoming_msg == '1' else 'hi'
-            set_user_language(from_number, selected_lang)
+            set_user_language(phone_number, selected_lang)
             msg.body(get_message('language_changed', selected_lang))
             return str(resp)
         
@@ -155,21 +162,35 @@ def whatsapp_webhook():
             msg.body(examples_text)
             return str(resp)
         
-        # Process the query with AI (with language preference)
-        logger.info(f"Processing query in {user_lang}: {incoming_msg}")
-        response = ai_processor.process_query(incoming_msg, user_lang)
+        # Check for expiry command
+        if incoming_msg.lower() in ['expiry', 'expiring', 'expire', 'एक्सपायरी']:
+            # Manually trigger expiry check
+            if user_lang == 'hi':
+                msg.body("एक्सपायरी अलर्ट भेजे जा रहे हैं...")
+            else:
+                msg.body("Sending expiry alerts...")
+            
+            # Run the expiry alert function asynchronously
+            import threading
+            thread = threading.Thread(target=send_expiry_alerts)
+            thread.start()
+            return str(resp)
+        
+        # Process the query with AI (with language preference and phone number for shop filtering)
+        logger.info(f"Processing query in {user_lang} for phone {phone_number}: {incoming_msg}")
+        response = ai_processor.process_query(incoming_msg, user_lang, phone_number)
         
         # Send the response
         msg.body(response)
         
-        logger.info(f"Sent response to {from_number} in {user_lang}")
+        logger.info(f"Sent response to {phone_number} in {user_lang}")
         return str(resp)
         
     except Exception as e:
         logger.error(f"Error processing WhatsApp message: {str(e)}")
         resp = MessagingResponse()
         msg = resp.message()
-        user_lang = get_user_language(from_number) if 'from_number' in locals() else 'en'
+        user_lang = get_user_language(phone_number) if 'phone_number' in locals() else 'en'
         msg.body(get_message('error', user_lang))
         return str(resp)
 
@@ -203,12 +224,15 @@ def send_message():
 
 if __name__ == '__main__':
     # Create database and sample data
-    create_database()
-    logger.info("Database initialized with sample data")
+    create_database_schema()
+    logger.info("Database schema initialized")
+    
+    # Set up cron job for expiry alerts
+    setup_cron_job()
     
     # Run the Flask app
     app.run(
         host='0.0.0.0',
         port=5001,
         debug=Config.DEBUG
-    ) 
+    )
