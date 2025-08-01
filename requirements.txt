@@ -1,7 +1,10 @@
 Flask==2.3.3
 twilio==8.10.0
-langchain>=0.1.0
-langchain-openai>=0.1.0
-openai>=1.6.1,<2.0.0
+requests==2.31.0
 python-dotenv==1.0.0
-sqlalchemy>=2.0.0 
+sqlalchemy>=2.0.0
+logging>=0.5.1.2
+supabase>=1.0.3
+psycopg2-binary>=2.9.5
+uuid>=1.30
+python-crontab>=2.7.1

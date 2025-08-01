@@ -10,12 +10,16 @@ class Config:
     TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
     TWILIO_WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER')
     
-    # OpenAI Configuration
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    # Hugging Face Configuration
+    HUGGINGFACE_API_KEY = os.getenv('HUGGINGFACE_API_KEY')
     
-    # Database Configuration
-    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///sales.db')
+    # Supabase Configuration
+    SUPABASE_URL = os.getenv('SUPABASE_URL')
+    SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+    
+    # Expiry Alert Configuration
+    EXPIRY_ALERT_DAYS = int(os.getenv('EXPIRY_ALERT_DAYS', '3'))
     
     # Flask Configuration
     SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')
-    DEBUG = os.getenv('DEBUG', 'True').lower() == 'true' 
+    DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
